@@ -1,11 +1,30 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Device Properties Example</title>
-
+    <title>Test App</title>
+	<style>
+		html{
+			height:100%;
+		}
+		body{
+			height:100%;
+			margin:0;
+			padding:0;
+			}
+		#map_placer{
+			height:100%;
+			width:100%;
+		}
+		
+	</style>
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDg8rJvLs_hpL9IPRFnlHpP53isRwo-voA&sensor=true">
+    </script>
     <script type="text/javascript" charset="utf-8">
 
+	var WatchID = null;
+	
     // Wait for device API libraries to load
     //
     document.addEventListener("deviceready", onDeviceReady, false);
@@ -13,17 +32,53 @@
     // device APIs are available
     //
     function onDeviceReady() {
-        var element = document.getElementById('deviceProperties');
-        element.innerHTML = 'Device Name: '     + device.name     + '<br />' +
-                            'Device Cordova: '  + device.cordova  + '<br />' +
-                            'Device Platform: ' + device.platform + '<br />' +
-                            'Device UUID: '     + device.uuid     + '<br />' +
-                            'Device Version: '  + device.version  + '<br />';
+        navigator.geolocation.getCurrentPosition(onSuccess,onError);
     }
-
+	
+	function onSuccess(position) {
+		var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+		var mapOptions = {
+			center: latLng,
+			panControl: false, 
+			zoomControl:true,
+			zoom: 16,
+			mapTypeId: google.maps.MapTypeId.ROADMAP
+			};
+			var mapContent = document.getElementById('map_placer');
+			var map = new google.maps.Map(mapContent, mapOptions);
+			var marker = new google.maps.Marker({position:latLng,map: map});
+	}
+	
+	function onError(error){
+		var errString = '';
+		if (error.code){
+			switch(error.code){
+				case 1:
+					errorString = 
+						'We do not have permission';
+					break;
+				case 2:
+					errorString = 
+						'The location can not be derermined';
+					break;
+				case 3:
+					errorString = 
+						'Ther was a time out';
+					break;
+				default:
+					errorString = 
+						'Unknown Error';
+					break;
+			}
+		}
+		var elment = document.getElementById('geolocation');
+		elment.innerHTML = errorString;
+		
+	}
     </script>
   </head>
   <body>
-    <p id="deviceProperties">Loading device properties...</p>
+    <div id="map_placer">Waiting for location data</div>
+    
   </body>
 </html>
